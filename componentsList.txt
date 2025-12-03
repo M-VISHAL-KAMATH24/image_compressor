@@ -1,0 +1,15 @@
+Components List:
+
+Header - App title + tagline
+
+UploadZone - Drag & drop area
+
+FileList - Selected files preview
+
+ActionButtons - Compress/Clear buttons
+
+ProgressBar - Upload processing bar
+
+ImageCard - Compressed image preview + download
+
+ResultsGrid - All compressed images display
