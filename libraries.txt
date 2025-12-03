@@ -1,0 +1,5 @@
+npm create vite@latest
+
+npm install react-dropzone axios lucide-react framer-motion
+
+npm install -D @types/react-dropzone
