@@ -4,10 +4,12 @@ import BackgroundShapes from './components/BackgroundShapes'
 import UploadZone from './components/UploadZone'
 import FileList from './components/FileList'
 import ActionButtons from './components/ActionButtons'
+import ResultsGrid from './components/ResultsGrid'
 
 function App() {
   const [files, setFiles] = useState([])
   const [isProcessing, setIsProcessing] = useState(false)
+  const [compressedFiles, setCompressedFiles] = useState([])
 
   const handleFilesSelect = (newFiles) => {
     setFiles(prev => [...prev, ...newFiles])
@@ -19,12 +21,28 @@ function App() {
 
   const handleCompress = () => {
     setIsProcessing(true)
-    // Backend call will go here
-    setTimeout(() => setIsProcessing(false), 2000) // Demo
+    // Backend call or demo
+    setTimeout(() => {
+      setCompressedFiles(files.map((file, i) => ({
+        name: file.name,
+        url: URL.createObjectURL(file),
+        originalSize: `${(file.size / 1024 / 1024).toFixed(1)} MB`,
+        compressedSize: `${(file.size * 0.4 / 1024 / 1024).toFixed(1)} MB`
+      })))
+      setIsProcessing(false)
+      setFiles([])
+    }, 2000)
   }
 
   const handleClearAll = () => {
     setFiles([])
+  }
+
+  const handleDownload = (url, name) => {
+    const a = document.createElement('a')
+    a.href = url
+    a.download = name.replace(/\.[^/.]+$/, '_compressed.jpg')
+    a.click()
   }
 
   return (
@@ -40,6 +58,10 @@ function App() {
           onClear={handleClearAll}
           isProcessing={isProcessing}
           disabled={false}
+        />
+        <ResultsGrid 
+          compressedFiles={compressedFiles}
+          onDownload={handleDownload}
         />
       </main>
     </div>

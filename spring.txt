@@ -1,0 +1,17 @@
+Spring Boot additional functionalities:
+
+Batch compression (process multiple files at once, return ZIP)
+
+Quality selector (80%, 90%, lossless options)
+
+Format conversion (PNG→JPEG, JPEG→WebP)
+
+Resize options (1920px, 1080px, custom)
+
+Watermarking (add logo/text)
+
+EXIF stripping (remove metadata)
+
+Image optimization reports (before/after stats)
+
+File type validation/security (reject malicious files)
