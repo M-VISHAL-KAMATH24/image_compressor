@@ -5,12 +5,14 @@ import UploadZone from './components/UploadZone'
 import FileList from './components/FileList'
 import ActionButtons from './components/ActionButtons'
 import ResultsGrid from './components/ResultsGrid'
+import ZipDownloadCard from './components/ZipDownloadCard'
 import axios from 'axios'
 
 function App() {
   const [files, setFiles] = useState([])
   const [isProcessing, setIsProcessing] = useState(false)
   const [compressedFiles, setCompressedFiles] = useState([])
+  const [zipUrl, setZipUrl] = useState(null)
 
   const handleFilesSelect = (newFiles) => {
     setFiles(prev => [...prev, ...newFiles])
@@ -20,46 +22,53 @@ function App() {
     setFiles(prev => prev.filter((_, index) => index !== indexToRemove))
   }
 
-const handleCompress = async () => {
-  if (files.length === 0) return
-  
-  setIsProcessing(true)
-  
-  const formData = new FormData()
-  files.forEach(file => {
-    formData.append('files', file)
-  })
-  
-  try {
-    const response = await axios.post('http://localhost:8080/api/compress/batch', formData, {
-      responseType: 'blob',
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      }
+  const handleCompress = async () => {
+    if (files.length === 0) return
+    
+    setIsProcessing(true)
+    
+    const formData = new FormData()
+    files.forEach(file => {
+      formData.append('files', file)
     })
     
-    const url = URL.createObjectURL(response.data)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `compressed-images-${Date.now()}.zip`
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
-    
-    alert('ZIP downloaded successfully!')
-    
-  } catch (error) {
-    console.error('Compression failed:', error)
-    alert('Compression failed. Check console for details.')
-  } finally {
-    setIsProcessing(false)
-    setFiles([])
+    try {
+      const response = await axios.post('http://localhost:8080/api/compress/batch', formData, {
+        responseType: 'blob'
+      })
+      
+      const url = URL.createObjectURL(response.data)
+      setZipUrl(url)
+      
+    } catch (error) {
+      console.error('Compression failed:', error)
+      alert('Compression failed. Check console for details.')
+    } finally {
+      setIsProcessing(false)
+      setFiles([])
+    }
   }
-}
-
 
   const handleClearAll = () => {
+    setFiles([])
+  }
+
+  const handleZipDownload = () => {
+    if (zipUrl) {
+      const a = document.createElement('a')
+      a.href = zipUrl
+      a.download = `compressed-images-${Date.now()}.zip`
+      document.body.appendChild(a)
+      a.click()
+      document.body.removeChild(a)
+    }
+  }
+
+  const clearZip = () => {
+    if (zipUrl) {
+      URL.revokeObjectURL(zipUrl)
+      setZipUrl(null)
+    }
     setFiles([])
   }
 
@@ -83,6 +92,11 @@ const handleCompress = async () => {
           onClear={handleClearAll}
           isProcessing={isProcessing}
           disabled={false}
+        />
+        <ZipDownloadCard 
+          zipUrl={zipUrl}
+          onDownload={handleZipDownload}
+          onClear={clearZip}
         />
         <ResultsGrid 
           compressedFiles={compressedFiles}
