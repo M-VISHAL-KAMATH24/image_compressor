@@ -5,6 +5,7 @@ import UploadZone from './components/UploadZone'
 import FileList from './components/FileList'
 import ActionButtons from './components/ActionButtons'
 import ResultsGrid from './components/ResultsGrid'
+import axios from 'axios'
 
 function App() {
   const [files, setFiles] = useState([])
@@ -19,20 +20,44 @@ function App() {
     setFiles(prev => prev.filter((_, index) => index !== indexToRemove))
   }
 
-  const handleCompress = () => {
-    setIsProcessing(true)
-    // Backend call or demo
-    setTimeout(() => {
-      setCompressedFiles(files.map((file, i) => ({
-        name: file.name,
-        url: URL.createObjectURL(file),
-        originalSize: `${(file.size / 1024 / 1024).toFixed(1)} MB`,
-        compressedSize: `${(file.size * 0.4 / 1024 / 1024).toFixed(1)} MB`
-      })))
-      setIsProcessing(false)
-      setFiles([])
-    }, 2000)
+const handleCompress = async () => {
+  if (files.length === 0) return
+  
+  setIsProcessing(true)
+  
+  const formData = new FormData()
+  files.forEach(file => {
+    formData.append('files', file)
+  })
+  
+  try {
+    const response = await axios.post('http://localhost:8080/api/compress/batch', formData, {
+      responseType: 'blob',
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+    
+    const url = URL.createObjectURL(response.data)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `compressed-images-${Date.now()}.zip`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+    
+    alert('ZIP downloaded successfully!')
+    
+  } catch (error) {
+    console.error('Compression failed:', error)
+    alert('Compression failed. Check console for details.')
+  } finally {
+    setIsProcessing(false)
+    setFiles([])
   }
+}
+
 
   const handleClearAll = () => {
     setFiles([])
