@@ -22,9 +22,10 @@ public class ImageController {
     @PostMapping("/compress/batch")
     public ResponseEntity<byte[]> compressBatch(
             @RequestParam("files") List<MultipartFile> files,
-            @RequestParam(value = "quality", defaultValue = "0.85") double quality) throws IOException {
+            @RequestParam(value = "quality", defaultValue = "0.85") double quality,
+            @RequestParam(value = "format", defaultValue = "jpg") String format) throws IOException {
         
-        byte[] zipBytes = compressService.compressBatch(files, quality);
+        byte[] zipBytes = compressService.compressBatch(files, quality, format);
         
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=compressed-images.zip")
@@ -35,16 +36,30 @@ public class ImageController {
     @PostMapping("/compress")
     public ResponseEntity<byte[]> compressSingle(
             @RequestParam("file") MultipartFile file,
-            @RequestParam(value = "quality", defaultValue = "0.85") double quality) throws IOException {
+            @RequestParam(value = "quality", defaultValue = "0.85") double quality,
+            @RequestParam(value = "format", defaultValue = "jpg") String format) throws IOException {
         
-        byte[] compressedImage = compressService.compressSingle(file, quality);
+        byte[] compressedImage = compressService.compressSingle(file, quality, format);
         String originalName = file.getOriginalFilename();
-        String extension = originalName.substring(originalName.lastIndexOf("."));
-        String compressedName = originalName.replace(extension, "_compressed.jpg");
+        String extension = "." + format.toLowerCase();
+        String compressedName = originalName.replace(getFileExtension(originalName), "compressed" + extension);
         
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + compressedName + "\"")
-                .contentType(MediaType.IMAGE_JPEG)
-                .body(compressedImage);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentDispositionFormData("attachment", compressedName);
+        headers.setContentType(getMediaType(format));
+        
+        return ResponseEntity.ok().headers(headers).body(compressedImage);
+    }
+
+    private String getFileExtension(String fileName) {
+        return fileName.substring(fileName.lastIndexOf(".") + 1);
+    }
+
+    private MediaType getMediaType(String format) {
+        return switch (format.toLowerCase()) {
+            case "webp" -> MediaType.parseMediaType("image/webp");
+            case "png" -> MediaType.IMAGE_PNG;
+            default -> MediaType.IMAGE_JPEG;
+        };
     }
 }

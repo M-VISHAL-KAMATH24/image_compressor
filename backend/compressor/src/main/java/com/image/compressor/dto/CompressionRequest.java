@@ -1,8 +1,8 @@
 package com.image.compressor.dto;
 
 public class CompressionRequest {
-    private double quality;
-    private String format;
+    private double quality = 0.85;
+    private String format = "jpg";
 
     public CompressionRequest() {}
 

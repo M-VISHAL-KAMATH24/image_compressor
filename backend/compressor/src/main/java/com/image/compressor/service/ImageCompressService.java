@@ -14,17 +14,18 @@ import java.util.zip.ZipOutputStream;
 @Service
 public class ImageCompressService {
 
-    public byte[] compressSingle(MultipartFile file, double quality) throws IOException {
-        return compressImage(file.getBytes(), quality);
+    public byte[] compressSingle(MultipartFile file, double quality, String format) throws IOException {
+        return compressImage(file.getBytes(), quality, format);
     }
 
-    public byte[] compressBatch(List<MultipartFile> files, double quality) throws IOException {
+    public byte[] compressBatch(List<MultipartFile> files, double quality, String format) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (ZipOutputStream zipOut = new ZipOutputStream(baos)) {
             for (MultipartFile file : files) {
-                byte[] compressedBytes = compressImage(file.getBytes(), quality);
+                byte[] compressedBytes = compressImage(file.getBytes(), quality, format);
                 String originalName = file.getOriginalFilename();
-                String zipEntryName = originalName.replace("." + getFileExtension(originalName), "_q" + (int)(quality*100) + ".jpg");
+                String zipEntryName = originalName.replace("." + getFileExtension(originalName), 
+                    "_q" + (int)(quality*100) + "_" + format.toLowerCase() + "." + format.toLowerCase());  // FIXED: Added .extension
                 
                 ZipEntry zipEntry = new ZipEntry(zipEntryName);
                 zipOut.putNextEntry(zipEntry);
@@ -35,14 +36,25 @@ public class ImageCompressService {
         return baos.toByteArray();
     }
 
-    private byte[] compressImage(byte[] imageBytes, double quality) throws IOException {
+    private byte[] compressImage(byte[] imageBytes, double quality, String format) throws IOException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        String outputFormat = validateFormat(format);
+        
         Thumbnails.of(new ByteArrayInputStream(imageBytes))
                 .scale(1.0)
-                .outputQuality(Math.min(1.0, Math.max(0.1, quality)))  // Clamp between 0.1-1.0
-                .outputFormat("jpg")
+                .outputQuality(Math.min(1.0, Math.max(0.1, quality)))
+                .outputFormat(outputFormat)
                 .toOutputStream(outputStream);
+                
         return outputStream.toByteArray();
+    }
+
+    private String validateFormat(String format) {
+        return switch (format.toLowerCase()) {
+            case "png" -> "png";
+            case "webp", "jpg", "jpeg" -> "jpg";
+            default -> "jpg";
+        };
     }
 
     private String getFileExtension(String fileName) {

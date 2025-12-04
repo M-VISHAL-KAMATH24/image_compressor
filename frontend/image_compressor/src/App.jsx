@@ -11,7 +11,8 @@ function App() {
   const [files, setFiles] = useState([])
   const [isProcessing, setIsProcessing] = useState(false)
   const [zipUrl, setZipUrl] = useState(null)
-  const [quality, setQuality] = useState(0.85)  // NEW: quality state
+  const [quality, setQuality] = useState(0.85)
+  const [format, setFormat] = useState('jpg')  // NEW: format state
 
   const handleFilesSelect = (newFiles) => {
     setFiles(prev => [...prev, ...newFiles])
@@ -32,9 +33,11 @@ function App() {
     })
     
     try {
-      const response = await axios.post(`http://localhost:8080/api/compress/batch?quality=${quality}`, formData, {
-        responseType: 'blob'
-      })
+      const response = await axios.post(
+        `http://localhost:8080/api/compress/batch?quality=${quality}&format=${format}`, 
+        formData, 
+        { responseType: 'blob' }
+      )
       
       const url = URL.createObjectURL(response.data)
       setZipUrl(url)
@@ -56,7 +59,7 @@ function App() {
     if (zipUrl) {
       const a = document.createElement('a')
       a.href = zipUrl
-      a.download = `compressed-images-q${Math.round(quality*100)}-${Date.now()}.zip`
+      a.download = `compressed-${format}_q${Math.round(quality*100)}-${Date.now()}.zip`
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
@@ -82,15 +85,18 @@ function App() {
           onCompress={handleCompress}
           onClear={handleClearAll}
           isProcessing={isProcessing}
-          quality={quality}        // NEW: pass quality
+          quality={quality}
+          format={format}          // NEW: pass format
           onQualityChange={setQuality}
+          onFormatChange={setFormat}
           disabled={false}
         />
         <ZipDownloadCard 
           zipUrl={zipUrl}
           onDownload={handleZipDownload}
           onClear={clearZip}
-          quality={quality}        // NEW: show quality used
+          quality={quality}
+          format={format}          // NEW: pass format
         />
       </main>
     </div>
