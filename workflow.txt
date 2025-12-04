@@ -1,0 +1,10 @@
+1. Quality Controller
+Quality Selector Workflow:
+User selects image files and picks quality (e.g. 80%, 90%, lossless) on frontend UI.
+Frontend sends files plus quality parameter in request (e.g. /api/compress/batch?quality=0.8).
+Spring Boot controller receives files and quality parameter.
+Controller calls service layer, passing quality value to compression method.
+Service compresses images using Thumbnailator with the specified output quality.
+Compressed images (single or batch ZIP) are returned as response.
+Frontend receives compressed images, displays previews or ZIP download option.
+User downloads compressed images with chosen quality applied.

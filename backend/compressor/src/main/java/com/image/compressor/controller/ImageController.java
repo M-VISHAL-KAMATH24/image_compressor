@@ -1,6 +1,5 @@
 package com.image.compressor.controller;
 
-import com.image.compressor.dto.CompressResponse;
 import com.image.compressor.service.ImageCompressService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -21,8 +20,11 @@ public class ImageController {
     private ImageCompressService compressService;
 
     @PostMapping("/compress/batch")
-    public ResponseEntity<byte[]> compressBatch(@RequestParam("files") List<MultipartFile> files) throws IOException {
-        byte[] zipBytes = compressService.compressBatch(files);
+    public ResponseEntity<byte[]> compressBatch(
+            @RequestParam("files") List<MultipartFile> files,
+            @RequestParam(value = "quality", defaultValue = "0.85") double quality) throws IOException {
+        
+        byte[] zipBytes = compressService.compressBatch(files, quality);
         
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=compressed-images.zip")
@@ -31,12 +33,14 @@ public class ImageController {
     }
 
     @PostMapping("/compress")
-    public ResponseEntity<byte[]> compressSingle(@RequestParam("file") MultipartFile file) throws IOException {
-        byte[] compressedImage = compressService.compressSingle(file);
+    public ResponseEntity<byte[]> compressSingle(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(value = "quality", defaultValue = "0.85") double quality) throws IOException {
         
+        byte[] compressedImage = compressService.compressSingle(file, quality);
         String originalName = file.getOriginalFilename();
         String extension = originalName.substring(originalName.lastIndexOf("."));
-        String compressedName = originalName.replace(extension, "_compressed" + extension);
+        String compressedName = originalName.replace(extension, "_compressed.jpg");
         
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + compressedName + "\"")

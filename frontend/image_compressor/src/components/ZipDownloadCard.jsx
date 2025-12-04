@@ -1,6 +1,6 @@
-import { Download, Package, Trash2, CheckCircle } from 'lucide-react'
+import { Download, Package, Trash2 } from 'lucide-react'
 
-export default function ZipDownloadCard({ zipUrl, onDownload, onClear }) {
+export default function ZipDownloadCard({ zipUrl, onDownload, onClear, quality }) {
   if (!zipUrl) return null
 
   return (
@@ -13,8 +13,8 @@ export default function ZipDownloadCard({ zipUrl, onDownload, onClear }) {
           <h2 className="text-4xl font-black bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent mb-4">
             Batch Complete!
           </h2>
-          <p className="text-xl text-gray-700 font-medium max-w-md mx-auto">
-            Your {onClear ? 'images are ready' : 'images have been compressed'}
+          <p className="text-xl text-gray-700 font-medium max-w-md mx-auto mb-2">
+            Compressed at <span className="font-black text-2xl text-emerald-600">{Math.round(quality * 100)}%</span> quality
           </p>
         </div>
 
@@ -24,7 +24,7 @@ export default function ZipDownloadCard({ zipUrl, onDownload, onClear }) {
             className="flex-1 max-w-md flex items-center justify-center space-x-3 px-8 py-6 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-bold text-lg rounded-2xl shadow-2xl hover:shadow-emerald-500/25 hover:scale-105 transition-all duration-300"
           >
             <Download className="w-6 h-6" />
-            <span>Download ZIP ({new Date().toLocaleTimeString()})</span>
+            <span>Download ZIP (Q{Math.round(quality * 100)}%)</span>
           </button>
           
           <button

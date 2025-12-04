@@ -4,14 +4,15 @@ public class CompressResponse {
     private String originalSize;
     private String compressedSize;
     private double savingsPercentage;
+    private double quality;
 
-    // Constructors, getters, setters
     public CompressResponse() {}
 
-    public CompressResponse(String originalSize, String compressedSize, double savingsPercentage) {
+    public CompressResponse(String originalSize, String compressedSize, double savingsPercentage, double quality) {
         this.originalSize = originalSize;
         this.compressedSize = compressedSize;
         this.savingsPercentage = savingsPercentage;
+        this.quality = quality;
     }
 
     // Getters and setters
@@ -23,4 +24,7 @@ public class CompressResponse {
     
     public double getSavingsPercentage() { return savingsPercentage; }
     public void setSavingsPercentage(double savingsPercentage) { this.savingsPercentage = savingsPercentage; }
+    
+    public double getQuality() { return quality; }
+    public void setQuality(double quality) { this.quality = quality; }
 }

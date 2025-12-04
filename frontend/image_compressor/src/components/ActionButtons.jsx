@@ -1,14 +1,35 @@
-import { Play, Trash2, RotateCcw } from 'lucide-react'
+import { Play, Trash2, Settings } from 'lucide-react'
 
-export default function ActionButtons({ files, onCompress, onClear, isProcessing, disabled }) {
+export default function ActionButtons({ files, onCompress, onClear, isProcessing, quality, onQualityChange, disabled }) {
   if (files.length === 0) return null
 
   return (
     <div className="max-w-md mx-auto">
       <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 shadow-2xl border border-gray-100">
+        
+        {/* Quality Selector - NEW */}
+        <div className="mb-6 p-4 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl">
+          <label className="block text-sm font-semibold text-gray-700 mb-3 flex items-center space-x-2">
+            <Settings className="w-5 h-5" />
+            <span>Quality</span>
+          </label>
+          <div className="flex items-center space-x-3">
+            <select 
+              value={quality} 
+              onChange={(e) => onQualityChange(parseFloat(e.target.value))}
+              className="flex-1 px-4 py-3 bg-white border-2 border-gray-200 rounded-xl focus:border-indigo-400 focus:ring-2 focus:ring-indigo-200 transition-all duration-200 text-lg font-semibold"
+              disabled={isProcessing}
+            >
+              <option value={0.8}>80% (Smallest)</option>
+              <option value={0.85}>85% (Balanced)</option>
+              <option value={0.9}>90% (High)</option>
+              <option value={1.0}>100% (Lossless)</option>
+            </select>
+            <span className="font-bold text-xl text-gray-700 min-w-[3rem]">{Math.round(quality * 100)}%</span>
+          </div>
+        </div>
+
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          
-          {/* Compress Button */}
           <button
             onClick={onCompress}
             disabled={disabled || isProcessing || files.length === 0}
@@ -31,7 +52,6 @@ export default function ActionButtons({ files, onCompress, onClear, isProcessing
             )}
           </button>
 
-          {/* Clear Button */}
           <button
             onClick={onClear}
             disabled={disabled || isProcessing}

@@ -4,15 +4,14 @@ import BackgroundShapes from './components/BackgroundShapes'
 import UploadZone from './components/UploadZone'
 import FileList from './components/FileList'
 import ActionButtons from './components/ActionButtons'
-import ResultsGrid from './components/ResultsGrid'
 import ZipDownloadCard from './components/ZipDownloadCard'
 import axios from 'axios'
 
 function App() {
   const [files, setFiles] = useState([])
   const [isProcessing, setIsProcessing] = useState(false)
-  const [compressedFiles, setCompressedFiles] = useState([])
   const [zipUrl, setZipUrl] = useState(null)
+  const [quality, setQuality] = useState(0.85)  // NEW: quality state
 
   const handleFilesSelect = (newFiles) => {
     setFiles(prev => [...prev, ...newFiles])
@@ -33,7 +32,7 @@ function App() {
     })
     
     try {
-      const response = await axios.post('http://localhost:8080/api/compress/batch', formData, {
+      const response = await axios.post(`http://localhost:8080/api/compress/batch?quality=${quality}`, formData, {
         responseType: 'blob'
       })
       
@@ -57,7 +56,7 @@ function App() {
     if (zipUrl) {
       const a = document.createElement('a')
       a.href = zipUrl
-      a.download = `compressed-images-${Date.now()}.zip`
+      a.download = `compressed-images-q${Math.round(quality*100)}-${Date.now()}.zip`
       document.body.appendChild(a)
       a.click()
       document.body.removeChild(a)
@@ -69,14 +68,6 @@ function App() {
       URL.revokeObjectURL(zipUrl)
       setZipUrl(null)
     }
-    setFiles([])
-  }
-
-  const handleDownload = (url, name) => {
-    const a = document.createElement('a')
-    a.href = url
-    a.download = name.replace(/\.[^/.]+$/, '_compressed.jpg')
-    a.click()
   }
 
   return (
@@ -91,16 +82,15 @@ function App() {
           onCompress={handleCompress}
           onClear={handleClearAll}
           isProcessing={isProcessing}
+          quality={quality}        // NEW: pass quality
+          onQualityChange={setQuality}
           disabled={false}
         />
         <ZipDownloadCard 
           zipUrl={zipUrl}
           onDownload={handleZipDownload}
           onClear={clearZip}
-        />
-        <ResultsGrid 
-          compressedFiles={compressedFiles}
-          onDownload={handleDownload}
+          quality={quality}        // NEW: show quality used
         />
       </main>
     </div>
